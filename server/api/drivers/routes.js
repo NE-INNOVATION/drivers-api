@@ -1,67 +1,44 @@
 const express = require('express')
-const pageConfig = require('./pageConfig')
 const router = express.Router({mergeParams: true})
-var drivers = [
-  {
-      type: 'self',
-      personalInfo: {
-          name: '',
-          marital_status: '',
-          gender: '',
-          ssn:''
-      },
-      priorinsurance: {
-          alreadyinsured: '',
-          licensed_age: ''
-      },
-      professionalInfo:{
-          education: '',
-          employment: ''
-      }
-  },
-  {
-      type: 'spouse',
-      personalInfo: {
-          name: '',
-          gender: '',
-          ssn: ''
-      },
-      professionalInfo:{
-          education: '',
-          employment: ''
-      }
+
+let drivers = [];
+
+router.route('/driverInfo/:id')
+  .get((req, res, next) => {
+    res.send(JSON.stringify(getDriverInfo(req.params.id)))
+  })
+  .post((req, res, next) => {
+    res.send(JSON.stringify({result : saveDriverInfo(req.body)}))
+  })
+
+let getDriverInfo = (id) => {
+  console.log('Returning Driver #', id)
+  return drivers.find( x => x.id === id )
+}
+
+let saveDriverInfo = (data) => {
+  let driver = '';
+  if(data.id !== ''){
+    driver = drivers.find( x => x.id === data.id );
+  }else{
+    driver = {};
   }
-];
-router.route('/personalInfo')
-  .get((req, res, next) => {
-    res.send(JSON.stringify(pageConfig.getPageConfig('PersonalInfo', drivers)))
-  })
-  .post((req, res, next) => {
-    drivers[0].personalInfo.name = req.body.name;
-    drivers[0].personalInfo.marital_status = req.body.maritalstatus;
-    drivers[0].personalInfo.gender = req.body.gender;
-    drivers[0].personalInfo.ssn = req.body.ssn;
-    res.send('data saved')
-  })
+  
+  driver.name = data.name
+  driver.gender = data.gender
+  driver.maritalStatus = data.maritalStatus
+  driver.ssn = data.ssn
+  driver.employmentStatus = data.employmentStatus
+  driver.currentIns = data.currentIns
+  driver.licensedAge = data.licensedAge
+  driver.education = data.education
+  
+  if(data.id === '') {
+    driver.id = driver.length + 1
+    drivers.push(driver)
+  }
 
-router.route('/priorInsurance')
-  .get((req, res, next) => {
-    res.send(JSON.stringify(getPageConfig('PriorInsurance', drivers)))
-  })
-  .post((req, res, next) => {
-    drivers[0].priorinsurance.alreadyinsured = req.body.priorins;
-    drivers[0].priorinsurance.licensed_age = req.body.agesince;
-    res.send('data saved')
-  })
-
-router.route('/professionalInfo')
-  .get((req, res, next) => {
-    res.send(JSON.stringify(getPageConfig('ProfessionalInfo', drivers)))
-  })
-  .post((req, res, next) => {
-    drivers[0].professionalInfo.education = req.body.education;
-    drivers[0].professionalInfo.employment = req.body.employment;
-    res.send('data saved')
-  })
+  return drivers.length;
+}
 
 module.exports = router;
