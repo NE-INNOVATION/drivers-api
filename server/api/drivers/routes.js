@@ -34,7 +34,7 @@ let saveDriverInfo = (data) => {
   driver.education = data.education
   
   if(data.id === '') {
-    driver.id = driver.length + 1
+    driver.id = drivers.length + 1
     drivers.push(driver)
   }
 
