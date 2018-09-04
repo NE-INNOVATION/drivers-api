@@ -3,17 +3,17 @@ const router = express.Router({mergeParams: true})
 
 let drivers = [];
 
-router.route('/driverInfo/:id')
+router.route('/driverInfo/:id/:quoteId')
   .get((req, res, next) => {
-    res.send(JSON.stringify(getDriverInfo(req.params.id)))
+    res.send(JSON.stringify(getDriverInfo(req.params.id, reques.params.quoteId)))
   })
   .post((req, res, next) => {
     res.send(JSON.stringify({result : saveDriverInfo(req.body)}))
   })
 
-let getDriverInfo = (id) => {
+let getDriverInfo = (id, quoteId) => {
   console.log('Returning Driver #', id)
-  return drivers.find( x => x.id === id )
+  return drivers.find( x => x.id === id && x.quoteId === quoteId)
 }
 
 let saveDriverInfo = (data) => {
@@ -22,6 +22,7 @@ let saveDriverInfo = (data) => {
     driver = drivers.find( x => x.id === data.id );
   }else{
     driver = {};
+    driver.quoteId = data.quoteId;
   }
   
   driver.name = data.name
