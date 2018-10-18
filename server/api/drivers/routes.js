@@ -1,26 +1,32 @@
 const express = require('express')
+var rn = require('random-number');
 const router = express.Router({mergeParams: true})
 const dataStore = require('../../data/dataStore')
 
-let drivers = [];
+var gen = rn.generator({
+  min:  100000000
+, max:  999999999
+, integer: true
+})
 
 router.route('/driverInfo/:id/:quoteId')
-  .get((req, res, next) => {
-    res.send(JSON.stringify(getDriverInfo(req.params.id, reques.params.quoteId)))
+  .get(async (req, res, next) => {
+    res.send(JSON.stringify(await getDriverInfo(req.params.id, reques.params.quoteId)))
   })
-  .post((req, res, next) => {
-    res.send(JSON.stringify({result : saveDriverInfo(req.body, req.params.quoteId)}))
+  .post(async (req, res, next) => {
+    res.send(JSON.stringify({result : await saveDriverInfo(req.body, req.params.quoteId)}))
   })
 
-let getDriverInfo = (id, quoteId) => {
+let getDriverInfo = async (id, quoteId) => {
   console.log('Returning Driver #', id)
-  return drivers.find( x => x.id === id && x.quoteId === quoteId)
+  let driver = await dataStore.findDriver(quoteId)
+  return driver
 }
 
-let saveDriverInfo = (data, quoteId) => {
+let saveDriverInfo = async (data, quoteId) => {
   let driver = '';
   if(data.id !== ''){
-    driver = drivers.find( x => x.id === data.id );
+    driver = await dataStore.findDriver(quoteId);
   }else{
     driver = {};
     driver.quoteId = quoteId;
@@ -36,13 +42,12 @@ let saveDriverInfo = (data, quoteId) => {
   driver.education = data.education
   
   if(data.id === '') {
-    driver.id = drivers.length + 1
-    drivers.push(driver)
+    driver.id = gen().toString()
   }
 
   dataStore.addDriver(driver)
 
-  return drivers.length;
+  return driver.id;
 }
 
 module.exports = router;
