@@ -35,7 +35,6 @@ let saveDriverInfo = async (data, quoteId) => {
   driver.name = data.name
   driver.gender = data.gender
   driver.maritalStatus = data.maritalStatus
-  driver.ssn = data.ssn
   driver.employmentStatus = data.employmentStatus
   driver.currentIns = data.currentIns
   driver.licensedAge = data.licensedAge
