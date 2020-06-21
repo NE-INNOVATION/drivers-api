@@ -40,6 +40,7 @@ let saveDriverInfo = async (data, quoteId) => {
   driver.currentIns = data.currentIns
   driver.licensedAge = data.licensedAge
   driver.education = data.education
+  driver.licenseNum = data.licenseNum
   
   if(data.id === '') {
     driver.id = gen().toString()
