@@ -40,7 +40,7 @@ let getDriverInfo = async (id, quoteId) => {
 
 let saveDriverInfo = async (data, quoteId) => {
   let driver = "";
-  // if(!data.id){
+  // if(data.id){
   //   driver = await dataStore.findDriver(quoteId);
   // }else{
   driver = {};
