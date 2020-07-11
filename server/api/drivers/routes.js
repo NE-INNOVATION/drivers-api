@@ -4,6 +4,10 @@ const router = express.Router({ mergeParams: true });
 const dataStore = require("../../data/dataStore");
 const axios = require("axios");
 const { Agent } = require("https");
+const winston = require("winston");
+const logger = winston.createLogger({
+  transports: [new winston.transports.Console()],
+});
 
 var gen = rn.generator({
   min: 100000000,
@@ -19,12 +23,14 @@ const client = axios.create({
 
 router
   .route("/driverInfo/:id/:quoteId")
-  .get(async (req, res, next) => {
+  .get(async (req, res) => {
+    logger.info(`app.api.drivers - getting driver with id - ${req.params.id}`);
     res.send(
       JSON.stringify(await getDriverInfo(req.params.id, reques.params.quoteId))
     );
   })
-  .post(async (req, res, next) => {
+  .post(async (req, res) => {
+    logger.info(`app.api.drivers - creating new driver`);
     res.send(
       JSON.stringify({
         result: await saveDriverInfo(req.body, req.params.quoteId),
@@ -33,46 +39,61 @@ router
   });
 
 let getDriverInfo = async (id, quoteId) => {
-  console.log("Returning Driver #", id);
-  let driver = await dataStore.findDriver(quoteId);
-  return driver;
+  try {
+    let driver = await dataStore.findDriver(quoteId);
+    return driver;
+  } catch (error) {
+    logger.error(
+      `app.api.drivers - getting driver#${id}, from quote#${quoteId} failed - ${JSON.stringify(
+        error
+      )}`
+    );
+  }
 };
 
 let saveDriverInfo = async (data, quoteId) => {
-  let driver = "";
-  // if(data.id){
-  //   driver = await dataStore.findDriver(quoteId);
-  // }else{
-  driver = {};
-  driver.quoteId = quoteId;
-  // }
+  try {
+    let driver = "";
+    // if(data.id){
+    //   driver = await dataStore.findDriver(quoteId);
+    // }else{
+    driver = {};
+    driver.quoteId = quoteId;
+    // }
 
-  driver.name = data.name;
-  driver.gender = data.gender;
-  driver.maritalStatus = data.maritalStatus;
-  driver.employmentStatus = data.employmentStatus;
-  driver.currentIns = data.currentIns;
-  driver.licensedAge = data.licensedAge;
-  driver.education = data.education;
-  driver.licenseNum = data.licenseNum;
+    driver.name = data.name;
+    driver.gender = data.gender;
+    driver.maritalStatus = data.maritalStatus;
+    driver.employmentStatus = data.employmentStatus;
+    driver.currentIns = data.currentIns;
+    driver.licensedAge = data.licensedAge;
+    driver.education = data.education;
+    driver.licenseNum = data.licenseNum;
 
-  if (!data.id) {
-    driver.id = gen().toString();
-  }
-
-  await client.post(
-    `${process.env.DB_SERVICE_URL}/${process.env.COLLECTION_NAME}`,
-    driver,
-    {
-      headers: {
-        "Content-Type": "application/json",
-      },
+    if (!data.id) {
+      driver.id = gen().toString();
     }
-  );
 
-  // dataStore.addDriver(driver);
+    await client.post(
+      `${process.env.DB_SERVICE_URL}/${process.env.COLLECTION_NAME}`,
+      driver,
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
 
-  return driver.id;
+    // dataStore.addDriver(driver);
+
+    return driver.id;
+  } catch (error) {
+    logger.error(
+      `app.api.drivers - error creating new driver - ${JSON.stringify(
+        error
+      )}`
+    );
+  }
 };
 
 module.exports = router;
