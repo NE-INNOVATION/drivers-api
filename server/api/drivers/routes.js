@@ -2,8 +2,6 @@ const express = require("express");
 var rn = require("random-number");
 const router = express.Router({ mergeParams: true });
 const dataStore = require("../../data/dataStore");
-const axios = require("axios");
-const { Agent } = require("https");
 const winston = require("winston");
 const logger = winston.createLogger({
   transports: [new winston.transports.Console()],
@@ -15,18 +13,16 @@ var gen = rn.generator({
   integer: true,
 });
 
-const client = axios.create({
-  httpsAgent: new Agent({
-    rejectUnauthorized: false,
-  }),
-});
-
 router
-  .route("/driverInfo/:id/:quoteId")
+  .route("/driverInfo/:quoteId/:driverId?")
   .get(async (req, res) => {
-    logger.info(`app.api.drivers - getting driver with id - ${req.params.id}`);
+    logger.info(
+      `app.api.drivers - getting driver with id - ${req.params.driverId}`
+    );
     res.send(
-      JSON.stringify(await getDriverInfo(req.params.id, reques.params.quoteId))
+      JSON.stringify(
+        await getDriverInfo(req.params.driverId, req.params.quoteId)
+      )
     );
   })
   .post(async (req, res) => {
@@ -38,13 +34,13 @@ router
     );
   });
 
-let getDriverInfo = async (id, quoteId) => {
+let getDriverInfo = async (driverId, quoteId) => {
   try {
-    let driver = await dataStore.findDriver(quoteId);
+    let driver = await dataStore.findDriver(driverId, quoteId);
     return driver;
   } catch (error) {
     logger.error(
-      `app.api.drivers - getting driver#${id}, from quote#${quoteId} failed - ${JSON.stringify(
+      `app.api.drivers - getting driver#${driverId}, from quote#${quoteId} failed - ${JSON.stringify(
         error
       )}`
     );
@@ -53,14 +49,14 @@ let getDriverInfo = async (id, quoteId) => {
 
 let saveDriverInfo = async (data, quoteId) => {
   try {
-    let driver = "";
-    // if(data.id){
-    //   driver = await dataStore.findDriver(quoteId);
-    // }else{
-    driver = {};
-    driver.quoteId = quoteId;
-    // }
+    let driver = {};
+    if (data.id) {
+      driver = await dataStore.findDriver(data.id, quoteId);
+    } else {
+      driver.id = gen().toString();
+    }
 
+    driver.quoteId = quoteId;
     driver.name = data.name;
     driver.gender = data.gender;
     driver.maritalStatus = data.maritalStatus;
@@ -70,28 +66,11 @@ let saveDriverInfo = async (data, quoteId) => {
     driver.education = data.education;
     driver.licenseNum = data.licenseNum;
 
-    if (!data.id) {
-      driver.id = gen().toString();
-    }
-
-    await client.post(
-      `${process.env.DB_SERVICE_URL}/${process.env.COLLECTION_NAME}`,
-      driver,
-      {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
-    );
-
-    // dataStore.addDriver(driver);
-
+    dataStore.addDriver(driver);
     return driver.id;
   } catch (error) {
     logger.error(
-      `app.api.drivers - error creating new driver - ${JSON.stringify(
-        error
-      )}`
+      `app.api.drivers - error creating new driver - ${JSON.stringify(error)}`
     );
   }
 };

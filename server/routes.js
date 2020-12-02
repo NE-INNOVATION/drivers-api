@@ -35,7 +35,7 @@ module.exports = () => {
   
   app.use(bodyParser.json())
   app.use('/api', route)
-  // dataStore.createDbConnection()
+  dataStore.createDbConnection()
   
   return app; 
 }
