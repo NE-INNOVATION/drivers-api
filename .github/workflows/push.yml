@@ -67,7 +67,7 @@ jobs:
         cmd: |
           'version'
           'project disaster-dev'
-          'tag --source=docker quay.io/neinnovationorg/drivers-api:${{ steps.extract_branch.outputs.branch }} stage/drivers-api:${{ steps.extract_branch.outputs.branch }}'
+          'tag --source=docker quay.io/neinnovationorg/drivers-api:${{ steps.extract_branch.outputs.branch }} disaster-dev/drivers-api:${{ steps.extract_branch.outputs.branch }}'
     - name: Scan Image
       uses: Azure/container-scan@v0
       continue-on-error: true
