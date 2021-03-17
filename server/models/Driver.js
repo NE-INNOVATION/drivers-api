@@ -40,4 +40,4 @@ const DriverSchema = new Schema({
   },
 });
 
-module.exports = Driver = mongoose.model("drivers", DriverSchema);
+module.exports = Driver = mongoose.model("col_lrqi_drivers", DriverSchema);

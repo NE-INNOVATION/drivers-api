@@ -83,7 +83,7 @@ router.post(
 // @access  Private
 router.delete("/drivers/driverInfo/:id?", async (req, res) => {
   try {
-    res.json({ msg: "Vehicle deleted" });
+    res.json({ msg: "Driver deleted" });
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");
