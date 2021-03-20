@@ -23,7 +23,7 @@ const DriverSchema = new Schema({
     required: true,
   },
   licensedDt: {
-    type: Date,
+    type: String,
     required: true,
   },
   maritalStatus: {
